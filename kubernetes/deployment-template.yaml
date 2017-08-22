@@ -1,0 +1,52 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: squash-api
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: squash-api
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.13-alpine
+          lifecycle:
+            preStop:
+              exec:
+                command: ['/usr/sbin/nginx','-s','quit']
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: '/etc/nginx/conf.d'
+            - name: tls-certs
+              mountPath: '/etc/tls'
+        - name: api
+          image: lsstsqre/squash-api:{{ TAG }}
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+          - name: SQUASH_DB_HOST
+          # squash-db resolves to the Cluster IP address
+            value: squash-db
+          - name: SQUASH_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-passwd
+                key: 'passwd.txt'
+          # on MINIKUBE we don't have an external IP, we use the minikube IP
+          # or the local hostname here
+          - name: ALLOWED_HOSTS
+            value: {{ SQUASH_API_HOST }},squash-bokeh,squash-dash
+      volumes:
+        - name: tls-certs
+          secret:
+            secretName: tls-certs
+        - name: nginx-conf
+          configMap:
+            name: squash-api-nginx-conf
+            items:
+              - key: 'nginx.conf'
+                path: 'nginx.conf'
+
