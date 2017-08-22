@@ -2,8 +2,102 @@
 SQuaSH API microservice
 
 
-## Development
-1. Clone the project, create a virtualenv and install dependencies
+
+## Requirements
+
+`squash-api` microservice requires at least the `squash-db` microservice and the TLS secrets that are installed by the
+`squash-deployment` tool.
+
+## Kubernetes deployment
+
+You can provision a Kubernetes cluster in GKE, clone this repo and deploy the `squash-api` microservice using:
+
+```
+  TAG=latest make deployment
+```
+
+and get the externao IP address for the service with:
+
+```
+  kubectl get service squash-api
+```
+
+NOTE: if using minikube make the deployment using:
+
+```
+  MINIKUBE=true TAG=latest make deployment
+```
+
+and open the service with:
+
+```
+  minikube service --https squash-api
+```
+
+### Debugging
+
+Use the `kubectl logs` command to view the logs of the `nginx` and `api` containers:
+
+``` 
+  kubectl logs deployment/squash-api nginx
+  kubectl logs deployment/squash-api api
+```
+
+Use the `kubectl exec` to run an interactive shell inside a container. Use tab completion or `kubectl get pods` command 
+to find the pod's name:
+
+
+``` 
+  kubectl exec <TAB> --stdin --tty -c api /bin/sh
+```
+
+### Rolling out updates 
+
+Check the update history with:
+
+```
+  kubectl rollout history deployment squash-api
+```
+
+Modify the `squash-api` image and then apply the new configuration for the kubernetes deployment:
+
+```
+  TAG=latest make build push update
+```
+
+Check the deployment changes:
+```
+  kubectl describe deployments squash-api
+```
+
+### Scaling up the squash-api microservice
+
+Use the `kubectl get replicasets` command to view the current set of replicas, and then the `kubectl scale` command 
+to scale up the `squash-api` deployment:
+
+``` 
+  kubectl scale deployments squash-api --replicas=3
+```
+
+or change the `kubernetes/deployment.yaml` configuration file and apply the new configuration:
+
+```
+  kubectl apply -f kubernetes/deployment.yaml
+```
+
+Check the deployment changes:
+
+``` 
+  kubectl describe deployments squash-api
+  kubectl get pods
+  kubectl get replicasets
+```
+
+## Development 
+
+You can install the dependencies and set up a local database with test data for developing
+
+1. Install the software dependencies
 ```
   git clone  https://github.com/lsst-sqre/squash-api.git
 
@@ -14,16 +108,16 @@ SQuaSH API microservice
   pip install -r requirements.txt
 ```
 
-2. Install MariaDB 10.1+
-
-For example, using brew:
+2. Development database
+ 
+It is a good idea to use the same database deployed by the `squash-db` microservice for local testing. On brew you can install MariaDB 10.1+ using:
 ```
 
   brew install mariadb
   mysql.server start
 ```
 
-3. Initialize the development database
+Create and initialize the development database
 
 ```
   mysql -u root -e "DROP DATABASE qadb"
@@ -34,29 +128,35 @@ For example, using brew:
   python manage.py migrate
 ```   
 
-4. Execute tests
-```
-  python manage.py check
-  python manage.py test api 
-```
-
-5. Load test data
+Load some test data
 ```
   python manage.py loaddata test_data
+```
+
+3. Run the `squash-api` 
+
+```
+  python manage.py runserver
 ```
 
 The `squash-api` will run at `http://localhost:8000`. 
 
 ### The Django Debug toolbar
 
-By default, `DEBUG=True` in `squash.settings.py` which will 
-display the Django debug toolbar. The Django debug toolbar can be used, among other things, to inspect the SQL queries that
-are executed when accessing the API endpoints.
+In order to display the Django toolbar make:
+
+```
+  export SQUASH_API_DEBUG=True
+  python manage.py runserver
+```
+
+The Django debug toolbar can be used, among other things, to debug the SQL queries that
+are executed when accessing the API.
 
 ### The SQuaSH API admin interface
 
-In development mode access the SQUASH API admin interface at `http://localhost:8000/admin`. You must create a superuser 
-in order to login:
+In development mode access the SQuaSH API admin interface at `http://localhost:8000/admin`, but before that you must 
+create a superuser in order to login:
  
 ```
   python manage.py createsuperuser 
