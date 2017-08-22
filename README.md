@@ -1,12 +1,12 @@
 # squash-api
 SQuaSH API microservice
 
-
+![SQuaSH API microservice](squash-api.png)
 
 ## Requirements
 
-`squash-api` microservice requires at least the `squash-db` microservice and the TLS secrets that are installed by the
-`squash-deployment` tool.
+`squash-api` microservice requires at least the [squash-db](https://github.com/lsst-sqre/squash-api) microservice and the TLS secrets that are installed by the
+[`squash-deployment`](https://github.com/lsst-sqre/squash-deployment) tool.
 
 ## Kubernetes deployment
 
