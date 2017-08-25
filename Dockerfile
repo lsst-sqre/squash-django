@@ -6,7 +6,7 @@ COPY . .
 
 # libmysqlclient-dev adds mysql_config which is needed by mysqlclient
 # gcc is required to compile mysqlclient
-# FIX: saddly there's one dependency in requirements.txt that requires git
+# FIX: sadly there's one dependency in requirements.txt that requires git
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y libmysqlclient-dev gcc git
 
