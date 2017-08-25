@@ -1,65 +1,166 @@
 # squash-api
 SQuaSH API microservice
 
+![SQuaSH API microservice](squash-api.png)
 
-## Development
-1. Clone the project, create a virtualenv and install dependencies
-```
-  git clone  https://github.com/lsst-sqre/squash-api.git
+## Requirements
 
-  cd squash-api
+`squash-api` microservice requires at least the [squash-db](https://github.com/lsst-sqre/squash-api) microservice and the TLS secrets that are installed by the
+[`squash-deployment`](https://github.com/lsst-sqre/squash-deployment) tool.
 
-  virtualenv env -p python3
-  source env/bin/activate
-  pip install -r requirements.txt
-```
+## Kubernetes deployment
 
-2. Install MariaDB 10.1+
-
-For example, using brew:
-```
-
-  brew install mariadb
-  mysql.server start
-```
-
-3. Initialize the development database
+You can provision a Kubernetes cluster in GKE, clone this repo and deploy the `squash-api` microservice using:
 
 ```
-  mysql -u root -e "DROP DATABASE qadb"
-  mysql -u root -e "CREATE DATABASE qadb"
+TAG=latest make deployment
+```
 
-  cd squash
-  python manage.py makemigrations
-  python manage.py migrate
+and get the external IP address for the service with:
+
+```
+kubectl get service squash-api
+```
+
+NOTE: if using minikube make the deployment using:
+
+```
+MINIKUBE=true TAG=latest make deployment
+```
+
+and open the service with:
+
+```
+minikube service --https squash-api
+```
+
+### Debugging
+
+Use the `kubectl logs` command to view the logs of the `nginx` and `api` containers:
+
+``` 
+kubectl logs deployment/squash-api nginx
+kubectl logs deployment/squash-api api
+```
+
+Use the `kubectl exec` to run an interactive shell inside a container. Use tab completion or `kubectl get pods` command 
+to find the pod's name:
+
+
+``` 
+kubectl exec <TAB> --stdin --tty -c api /bin/sh
+```
+
+### Rolling out updates 
+
+Check the update history with:
+
+```
+kubectl rollout history deployment squash-api
+```
+
+Modify the `squash-api` image and then apply the new configuration for the kubernetes deployment:
+
+```
+TAG=latest make build push update
+```
+
+Check the deployment changes:
+```
+kubectl describe deployments squash-api
+```
+
+### Scaling up the squash-api microservice
+
+Use the `kubectl get replicasets` command to view the current set of replicas, and then the `kubectl scale` command 
+to scale up the `squash-api` deployment:
+
+``` 
+kubectl scale deployments squash-api --replicas=3
+```
+
+or change the `kubernetes/deployment.yaml` configuration file and apply the new configuration:
+
+```
+kubectl apply -f kubernetes/deployment.yaml
+```
+
+Check the deployment changes:
+
+``` 
+kubectl describe deployments squash-api
+kubectl get pods
+kubectl get replicasets
+```
+
+## Development 
+
+You can install the dependencies and set up a local database with test data for developing
+
+1. Install the software dependencies
+```
+git clone  https://github.com/lsst-sqre/squash-api.git
+
+cd squash-api
+
+virtualenv env -p python3
+source env/bin/activate
+pip install -r requirements.txt
+```
+
+2. Development database
+ 
+You can use the `squash-db` deployment for local testing, or install `MariaDB 10.1+` microservice, for instance, 
+using `brew`:
+
+```
+brew install mariadb
+mysql.server start
+```
+
+Create and initialize the development database
+
+```
+mysql -u root -e "DROP DATABASE qadb"
+mysql -u root -e "CREATE DATABASE qadb"
+
+cd squash
+python manage.py makemigrations
+python manage.py migrate
 ```   
 
-4. Execute tests
+Load some test data
 ```
-  python manage.py check
-  python manage.py test api 
+python manage.py loaddata test_data
 ```
 
-5. Load test data
+3. Run the `squash-api` 
+
 ```
-  python manage.py loaddata test_data
+python manage.py runserver
 ```
 
 The `squash-api` will run at `http://localhost:8000`. 
 
-### The Django Debug toolbar
+### The Django debug toolbar
 
-By default, `DEBUG=True` in `squash.settings.py` which will 
-display the Django debug toolbar. The Django debug toolbar can be used, among other things, to inspect the SQL queries that
-are executed when accessing the API endpoints.
+In order to display the Django debug toolbar make:
+
+```
+export SQUASH_API_DEBUG=True
+python manage.py runserver
+```
+
+The Django debug toolbar can be used, among other things, to debug the SQL queries that
+are executed when accessing the API.
 
 ### The SQuaSH API admin interface
 
-In development mode access the SQUASH API admin interface at `http://localhost:8000/admin`. You must create a superuser 
-in order to login:
+In development mode access the SQuaSH API admin interface at `http://localhost:8000/admin`. 
+You need to create a superuser in order to login:
  
 ```
-  python manage.py createsuperuser 
+python manage.py createsuperuser 
 ```
  
 

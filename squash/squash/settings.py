@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
@@ -23,10 +22,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get('SECRET_KEY', os.urandom(32))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
+if os.environ.get('SQUASH_API_DEBUG').lower() == 'true':
+    DEBUG = True
+else:
+    DEBUG = False
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
-
 
 # Application definition
 
@@ -93,8 +95,6 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'qadb',
         'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8mb4',
@@ -106,6 +106,11 @@ DATABASES = {
         },
     }
 }
+
+# Environment variables set in the squash-api deployment
+
+DATABASES['default']['HOST'] = os.environ.get('SQUASH_DB_HOST', 'localhost')
+DATABASES['default']['PASSWORD'] = os.environ.get('SQUASH_DB_PASSWORD', '')
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -124,6 +129,10 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# set X-Forwarded-Proto header for django rest framework
+# https://docs.djangoproject.com/en/1.11/ref/settings/#secure-proxy-ssl-header
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Internationalization
