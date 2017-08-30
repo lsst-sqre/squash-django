@@ -23,7 +23,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', os.urandom(32))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-if os.environ.get('SQUASH_API_DEBUG').lower() == 'true':
+if os.environ.get('SQUASH_API_DEBUG', 'False').lower() == 'true':
     DEBUG = True
 else:
     DEBUG = False
