@@ -148,6 +148,12 @@ USE_L10N = True
 
 USE_TZ = True
 
+# The absolute path to the directory where collectstatic will collect static
+# files for deployment, static files are added to the dash-nginx container
+
+STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR),
+                           'kubernetes/nginx/static/')
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
