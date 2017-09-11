@@ -32,6 +32,8 @@ spec:
           - name: SQUASH_DB_HOST
           # squash-db resolves to the Cluster IP address
             value: squash-db
+          - name: SQUASH_MINIKUBE_IP
+            value: {{ SQUASH_MINIKUBE_IP }}
           - name: SQUASH_DB_PASSWORD
             valueFrom:
               secretKeyRef:
