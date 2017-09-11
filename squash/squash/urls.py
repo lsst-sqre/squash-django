@@ -30,7 +30,9 @@ api_router.register(r'datasets', views.DatasetViewSet,
 api_router.register(r'defaults', views.DefaultsViewSet,
                     base_name='defaults')
 
-# endpoints for data consumed by the bokeh apps
+api_router.register(r'code_changes', views.CodeChangesViewSet,
+                    base_name='code_changes')
+
 api_router.register(r'measurements', views.MeasurementViewSet,
                     base_name='measurements')
 api_router.register(r'apps', views.AppViewSet,
@@ -45,5 +47,3 @@ if settings.DEBUG:
     import debug_toolbar
     urlpatterns = [url(r'^__debug__/',
                        include(debug_toolbar.urls)), ] + urlpatterns
-
-
