@@ -93,7 +93,7 @@ kubectl get pods
 kubectl get replicasets
 ```
 
-## Development 
+## Development workflow 
 
 You can install the dependencies and set up a local database with test data for developing
 
