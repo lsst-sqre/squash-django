@@ -23,7 +23,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', os.urandom(32))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-if os.environ.get('SQUASH_API_DEBUG').lower() == 'true':
+if os.environ.get('SQUASH_API_DEBUG', 'False').lower() == 'true':
     DEBUG = True
 else:
     DEBUG = False
@@ -147,6 +147,12 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+# The absolute path to the directory where collectstatic will collect static
+# files for deployment, static files are added to the dash-nginx container
+
+STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR),
+                           'kubernetes/nginx/static/')
 
 
 # Static files (CSS, JavaScript, Images)

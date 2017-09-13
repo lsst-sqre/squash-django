@@ -12,13 +12,15 @@ fi
 # values returned if the service is not ready
 HOST=""
 PORT=""
+SQUASH_MINIKUBE_IP=""
 
 # on minikube we don't have an external IP
-# configure the `minikube ip` to point to squash-local.lsst.codes in your /etc/hosts
+# `minikube ip` points to squash-local.lsst.codes in /etc/hosts
 
 if [ "$MINIKUBE" == "true" ]; then
     HOST=squash-local.lsst.codes
     PORT=$(kubectl get services squash-api -o jsonpath --template='{.spec.ports[0].nodePort}')
+    SQUASH_MINIKUBE_IP=$(minikube ip)
 else
     # on GKE
     WAIT_TIME=5
@@ -39,9 +41,9 @@ fi
 
 echo "Service address: $HOST:$PORT"
 
-
 sed -e "
 s/{{ TAG }}/${TAG}/
 s/{{ SQUASH_API_HOST }}/${HOST}/
 s/{{ SQUASH_API_PORT }}/${PORT}/
+s/{{ SQUASH_MINIKUBE_IP }}/${SQUASH_MINIKUBE_IP}/
 " $1 > $2

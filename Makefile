@@ -1,17 +1,23 @@
-all:
-PREFIX = lsstsqre/squash-api
+API = lsstsqre/squash-api
+NGINX  = lsstsqre/squash-api-nginx
 NGINX_TEMPLATE = kubernetes/nginx/nginx-template.conf
 NGINX_CONFIG = kubernetes/nginx/nginx.conf
-REPLACE = ./kubernetes/replace.sh
 DEPLOYMENT_TEMPLATE = kubernetes/deployment-template.yaml
 DEPLOYMENT_CONFIG = kubernetes/deployment.yaml
 SERVICE_CONFIG = kubernetes/service.yaml
+STATIC = kubernetes/nginx/static
+REPLACE = ./kubernetes/replace.sh
 
-build: check-tag
-	docker build -t $(PREFIX):${TAG} .
+$(STATIC):
+	cd squash; python manage.py collectstatic
+
+build: check-tag $(STATIC)
+	docker build -t $(API):${TAG} .
+	docker build -t $(NGINX):${TAG} kubernetes/nginx
 
 push: check-tag
-	docker push $(PREFIX):${TAG}
+	docker push $(API):${TAG}
+	docker push $(NGINX):${TAG}
 
 service:
 	@echo "Creating service..."
@@ -38,6 +44,8 @@ update: check-tag
 
 clean:
 	rm $(DEPLOYMENT_CONFIG)
+	rm $(NGINX_CONFIG)
+	rm -f $(STATIC)
 
 check-tag:
 	@if test -z ${TAG}; then echo "Error: TAG is undefined."; exit 1; fi

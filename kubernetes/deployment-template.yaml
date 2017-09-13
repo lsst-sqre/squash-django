@@ -11,7 +11,8 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: nginx:1.13-alpine
+          imagePullPolicy: "Always"
+          image: lsstsqre/squash-api-nginx:{{ TAG }}
           lifecycle:
             preStop:
               exec:
@@ -22,6 +23,7 @@ spec:
             - name: tls-certs
               mountPath: '/etc/tls'
         - name: api
+          imagePullPolicy: "Always"
           image: lsstsqre/squash-api:{{ TAG }}
           ports:
             - name: http
@@ -30,6 +32,8 @@ spec:
           - name: SQUASH_DB_HOST
           # squash-db resolves to the Cluster IP address
             value: squash-db
+          - name: SQUASH_MINIKUBE_IP
+            value: {{ SQUASH_MINIKUBE_IP }}
           - name: SQUASH_DB_PASSWORD
             valueFrom:
               secretKeyRef:

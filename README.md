@@ -93,7 +93,7 @@ kubectl get pods
 kubectl get replicasets
 ```
 
-## Development 
+## Development workflow 
 
 You can install the dependencies and set up a local database with test data for developing
 
@@ -137,6 +137,7 @@ python manage.py loaddata test_data
 3. Run the `squash-api` 
 
 ```
+export SQUASH_API_DEBUG=True
 python manage.py runserver
 ```
 
@@ -144,14 +145,14 @@ The `squash-api` will run at `http://localhost:8000`.
 
 ### The Django debug toolbar
 
-In order to display the Django debug toolbar make:
+When you run the `squash-api` with 
 
 ```
 export SQUASH_API_DEBUG=True
 python manage.py runserver
 ```
 
-The Django debug toolbar can be used, among other things, to debug the SQL queries that
+you also activate the Django debug toolbar. The Django debug toolbar can be used, among other things, to debug the SQL queries that
 are executed when accessing the API.
 
 ### The SQuaSH API admin interface
