@@ -16,24 +16,6 @@ You can provision a Kubernetes cluster in GKE, clone this repo and deploy the `s
 TAG=latest make deployment
 ```
 
-and get the external IP address for the service with:
-
-```
-kubectl get service squash-api
-```
-
-NOTE: if using minikube make the deployment using:
-
-```
-MINIKUBE=true TAG=latest make deployment
-```
-
-and open the service with:
-
-```
-minikube service --https squash-api
-```
-
 ### Debugging
 
 Use the `kubectl logs` command to view the logs of the `nginx` and `api` containers:
@@ -62,6 +44,11 @@ kubectl rollout history deployment squash-api
 Modify the `squash-api` image and then apply the new configuration for the kubernetes deployment:
 
 ```
+# we need to setup the env for django to collect static files
+virtualenv env -p python3
+source env/bin/activate
+pip install -r requirements.txt
+
 TAG=latest make build push update
 ```
 

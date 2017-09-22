@@ -32,17 +32,13 @@ spec:
           - name: SQUASH_DB_HOST
           # squash-db resolves to the Cluster IP address
             value: squash-db
-          - name: SQUASH_MINIKUBE_IP
-            value: {{ SQUASH_MINIKUBE_IP }}
           - name: SQUASH_DB_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: mysql-passwd
                 key: 'passwd.txt'
-          # on MINIKUBE we don't have an external IP, we use the minikube IP
-          # or the local hostname here
           - name: ALLOWED_HOSTS
-            value: {{ SQUASH_API_HOST }},squash-bokeh,squash-dash
+            value: {{ SQUASH_API_HOST }}
       volumes:
         - name: tls-certs
           secret:

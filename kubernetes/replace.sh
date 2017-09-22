@@ -11,39 +11,33 @@ fi
 
 # values returned if the service is not ready
 HOST=""
-PORT=""
-SQUASH_MINIKUBE_IP=""
 
-# on minikube we don't have an external IP
-# `minikube ip` points to squash-local.lsst.codes in /etc/hosts
-
-if [ "$MINIKUBE" == "true" ]; then
-    HOST=squash-local.lsst.codes
-    PORT=$(kubectl get services squash-api -o jsonpath --template='{.spec.ports[0].nodePort}')
-    SQUASH_MINIKUBE_IP=$(minikube ip)
-else
-    # on GKE
-    WAIT_TIME=5
-    while [ "$HOST" == "" ] && [ "$WAIT_TIME" -le 10 ]; do
-        echo "Waiting for the service to become available..."
-        sleep $(( WAIT_TIME++ ))
-        # TODO: we'll need the hostname once DNS is configured
-        HOST=$(kubectl get service squash-bokeh -o jsonpath --template='{.status.loadBalancer.ingress[0].ip}')
-    done
-    PORT=443
-fi
+# on GKE
+WAIT_TIME=5
+while [ "$HOST" == "" ] && [ "$WAIT_TIME" -le 20 ]; do
+    echo "Waiting for the service to become available..."
+    sleep $(( WAIT_TIME++ ))
+    HOST=$(kubectl get service squash-api -o jsonpath --template='{.status.loadBalancer.ingress[0].ip}')
+done
 
 if [ "$HOST" == "" ]; then
     echo "Service is not ready..."
-    echo "If you are deploying to a minikube local cluster, make sure you set MINIKUBE=true."
     exit 1
 fi
 
+PORT=443
 echo "Service address: $HOST:$PORT"
+
+NAMESPACE=$(kubectl config current-context)
+
+SQUASH_API_HOST="squash-api.${NAMESPACE}.lsst.codes"
+
+if [ "$NAMESPACE" == "squash-prod" ]; then
+    SQUASH_API_HOST="squash-api.lsst.codes"
+fi
+
 
 sed -e "
 s/{{ TAG }}/${TAG}/
-s/{{ SQUASH_API_HOST }}/${HOST}/
-s/{{ SQUASH_API_PORT }}/${PORT}/
-s/{{ SQUASH_MINIKUBE_IP }}/${SQUASH_MINIKUBE_IP}/
+s/{{ SQUASH_API_HOST }}/${SQUASH_API_HOST}/
 " $1 > $2

@@ -1,6 +1,5 @@
 API = lsstsqre/squash-api
 NGINX  = lsstsqre/squash-api-nginx
-NGINX_TEMPLATE = kubernetes/nginx/nginx-template.conf
 NGINX_CONFIG = kubernetes/nginx/nginx.conf
 DEPLOYMENT_TEMPLATE = kubernetes/deployment-template.yaml
 DEPLOYMENT_CONFIG = kubernetes/deployment.yaml
@@ -27,7 +26,6 @@ service:
 configmap:
 	@echo "Creating config map for nginx configuration..."
 	kubectl delete --ignore-not-found=true configmap squash-api-nginx-conf
-	@$(REPLACE) $(NGINX_TEMPLATE) $(NGINX_CONFIG)
 	kubectl create configmap squash-api-nginx-conf --from-file=$(NGINX_CONFIG)
 
 deployment: check-tag service configmap
@@ -37,7 +35,7 @@ deployment: check-tag service configmap
 	kubectl create -f $(DEPLOYMENT_CONFIG)
 
 update: check-tag
-	@echo "Updating squash-bokeh deployment..."
+	@echo "Updating squash-api deployment..."
 	@$(REPLACE) $(DEPLOYMENT_TEMPLATE) $(DEPLOYMENT_CONFIG)
 	kubectl apply -f $(DEPLOYMENT_CONFIG) --record
 	kubectl rollout history deployment squash-api
