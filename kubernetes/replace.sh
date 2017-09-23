@@ -30,7 +30,7 @@ echo "Service address: $HOST:$PORT"
 
 NAMESPACE=$(kubectl config current-context)
 
-SQUASH_API_HOST="squash-api.${NAMESPACE}.lsst.codes"
+SQUASH_API_HOST="squash-api-${NAMESPACE}.lsst.codes"
 
 if [ "$NAMESPACE" == "squash-prod" ]; then
     SQUASH_API_HOST="squash-api.lsst.codes"
