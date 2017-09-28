@@ -2,12 +2,16 @@ kind: Deployment
 apiVersion: extensions/v1beta1
 metadata:
   name: squash-api
+  labels:
+    app: squash
 spec:
-  replicas: 1
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
-        app: squash-api
+        app: squash
+        tier: api
     spec:
       containers:
         - name: nginx
