@@ -31,10 +31,10 @@ kubectl logs deployment/squash-api nginx
 kubectl logs deployment/squash-api api
 ```
 
-You can open a terminal inside the containers with:
+You can open a terminal inside the `api` container with:
 
 ``` 
-kubectl exec <TAB> --stdin --tty -c api /bin/sh
+kubectl exec -it <TAB> -c api /bin/bash
 ```
 
 ### Rolling out updates 
