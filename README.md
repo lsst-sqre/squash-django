@@ -5,47 +5,33 @@ SQuaSH API microservice
 
 ## Requirements
 
-`squash-api` microservice requires at least the [squash-db](https://github.com/lsst-sqre/squash-api) microservice and the TLS secrets that are installed by the
+`squash-api` requires the [squash-db](https://github.com/lsst-sqre/squash-api) microservice and the TLS secrets that are installed by the
 [`squash-deployment`](https://github.com/lsst-sqre/squash-deployment) tool.
 
 ## Kubernetes deployment
 
-You can provision a Kubernetes cluster in GKE, clone this repo and deploy the `squash-api` microservice using:
+Assuming you have kubectl configured to access your GCE cluster, you can deploy `squash-api` using:
 
 ```
 TAG=latest make deployment
 ```
 
-and get the external IP address for the service with:
-
-```
-kubectl get service squash-api
-```
-
-NOTE: if using minikube make the deployment using:
-
-```
-MINIKUBE=true TAG=latest make deployment
-```
-
-and open the service with:
-
-```
-minikube service --https squash-api
-```
-
 ### Debugging
 
-Use the `kubectl logs` command to view the logs of the `nginx` and `api` containers:
+You can inspect the deployment using:
 
+```bash
+kubectl describe deployment squash-api
+```
+
+and the container logs using:
+ 
 ``` 
 kubectl logs deployment/squash-api nginx
 kubectl logs deployment/squash-api api
 ```
 
-Use the `kubectl exec` to run an interactive shell inside a container. Use tab completion or `kubectl get pods` command 
-to find the pod's name:
-
+You can open a terminal inside the containers with:
 
 ``` 
 kubectl exec <TAB> --stdin --tty -c api /bin/sh
@@ -59,9 +45,14 @@ Check the update history with:
 kubectl rollout history deployment squash-api
 ```
 
-Modify the `squash-api` image and then apply the new configuration for the kubernetes deployment:
+Modify the `squash-api` image and then apply the new configuration for the Kubernetes deployment:
 
 ```
+# you need to setup the env for Django to collect the static files
+virtualenv env -p python3
+source env/bin/activate
+pip install -r requirements.txt
+ 
 TAG=latest make build push update
 ```
 
@@ -95,7 +86,7 @@ kubectl get replicasets
 
 ## Development workflow 
 
-You can install the dependencies and set up a local database with test data for developing
+For development, you may install the dependencies and set up a local database with test data:
 
 1. Install the software dependencies
 ```
@@ -110,27 +101,22 @@ pip install -r requirements.txt
 
 2. Development database
  
-You can use the `squash-db` deployment for local testing, or install `MariaDB 10.1+` microservice, for instance, 
-using `brew`:
+You can install `mariadb 10.1+`, for instance using `brew`:
 
 ```
 brew install mariadb
 mysql.server start
 ```
 
-Create and initialize the development database
+then create and initialize the development database
 
 ```
 mysql -u root -e "DROP DATABASE qadb"
 mysql -u root -e "CREATE DATABASE qadb"
-
+ 
 cd squash
 python manage.py makemigrations
 python manage.py migrate
-```   
-
-Load some test data
-```
 python manage.py loaddata test_data
 ```
 

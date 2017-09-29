@@ -134,6 +134,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/1.11/ref/settings/#secure-proxy-ssl-header
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# https://docs.djangoproject.com/en/1.11/ref/settings/#session-cookie-domain
+SESSION_COOKIE_DOMAIN = ".lsst.codes"
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/

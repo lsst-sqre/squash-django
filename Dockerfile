@@ -8,7 +8,7 @@ COPY . .
 # gcc is required to compile mysqlclient and uwsgi
 # FIX: sadly there's one dependency in requirements.txt that requires git
 RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y libmysqlclient-dev gcc git
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y libmysqlclient-dev gcc git mysql-client netcat
 
 # set --default-timeout if you are annoyed by pypi.python.org time out errors (default is 15s)
 RUN pip install --default-timeout=60 --no-cache-dir -r requirements.txt
@@ -19,5 +19,4 @@ RUN chown -R uwsgi:uwsgi_grp /opt/squash
 USER uwsgi
 
 EXPOSE 8000
-# If running with minikube set a hostname with a proper domain name so that SSL works
-CMD if [ ! -z "$SQUASH_MINIKUBE_IP" ]; then echo "$SQUASH_MINIKUBE_IP squash-local.lsst.codes"; fi >> /etc/hosts; uwsgi uwsgi.ini
+CMD uwsgi uwsgi.ini
