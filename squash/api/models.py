@@ -17,7 +17,7 @@ class Job(models.Model):
                                   help_text='Name of the dataset, e.g cfht')
     ci_label = models.CharField(max_length=16, blank=False,
                                 help_text='Name of the platform, eg. centos-7')
-    date = models.DateTimeField(auto_now=True,
+    date = models.DateTimeField(auto_now_add=True,
                                 help_text='Datetime when job was registered')
     ci_url = models.URLField(null=False, help_text='Jenkins job URL')
     status = models.SmallIntegerField(default=STATUS_OK,
