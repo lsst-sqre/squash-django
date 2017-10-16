@@ -41,7 +41,7 @@ List the first 5 measurements of each metric on `cfht` dataset:
 ```
 
 
-Using the `__debug` field to output the underline SQL queries being executed: 
+Using the `__debug` field to output the SQL queries being executed: 
 
 ```
 {
