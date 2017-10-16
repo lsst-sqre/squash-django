@@ -40,6 +40,8 @@ List the first 5 measurements of each metric on `cfht` dataset:
 }
 ```
 
+NOTE: `job_CiDataset` looks odd, that's because GraphQL change names to CamelCase and in django ORM we do `job__ci_dataset` to access a field in another table through a foreign key. I think we can improve that.
+
 
 Using the `__debug` field to output the SQL queries being executed: 
 
