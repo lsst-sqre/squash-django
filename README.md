@@ -1,16 +1,95 @@
 # squash-api
-SQuaSH API microservice
+
+SQuaSH API microservice.
 
 ![SQuaSH API microservice](squash-api.png)
 
-## Requirements
+# GraphQL sample queries
 
-`squash-api` requires the [squash-db](https://github.com/lsst-sqre/squash-api) microservice and the TLS secrets that are installed by the
-[`squash-deployment`](https://github.com/lsst-sqre/squash-deployment) tool.
+This implementation uses [graphene-django](http://docs.graphene-python.org/projects/django/en/latest/) to create a GraphQL [schema](https://github.com/lsst-sqre/squash-api/tree/master/squash/squash/api/schema.py) from the django ORM [model](https://github.com/lsst-sqre/squash-api/tree/master/squash/squash/api/models.py).
+ 
+List all squash metrics, showing unit and description:
+
+```json
+{
+  metrics {
+    metric
+    unit
+    description
+  }
+}
+```
+
+
+List the first 5 measurements of each metric on `cfht` dataset:
+
+```json
+
+{
+  metrics {
+    metric
+    unit
+    description
+    measurements(first: 5, job_CiDataset: "cfht") {
+      edges {
+        node {
+          value
+        }
+      }
+    }
+  }
+}
+
+
+
+```
+
+
+Using the `__debug` field to output the underline SQL queries being executed: 
+
+```json 
+{
+  metrics {
+    metric
+    unit
+    description
+   
+  }
+  # the __debug field will output the SQL queries
+  __debug {
+    sql {
+      sql
+      duration
+    }
+  }
+}
+```
+
+A generic query to inspect the GraphQL schema:
+
+```json
+{
+  __schema {
+    queryType {
+      name
+      description
+      fields {
+        name
+        description
+        isDeprecated
+        deprecationReason
+      }
+    }
+  }
+}
+```
 
 ## Kubernetes deployment
 
-Assuming you have kubectl configured to access your GCE cluster, you can deploy `squash-api` using:
+`squash-api` requires the [squash-db](https://github.com/lsst-sqre/squash-db) microservice and the TLS secrets that are installed by the
+[`squash-deployment`](https://github.com/lsst-sqre/squash-deployment) tool.
+
+Assuming you have kubectl configured to access your GKE cluster, you can deploy `squash-api` using:
 
 ```
 TAG=latest make deployment
@@ -101,50 +180,27 @@ pip install -r requirements.txt
 
 2. Development database
  
-You can install `mariadb 10.1+`, for instance using `brew`:
+You can use an instance of [squash-db](https://github.com/lsst-sqre/squash-db) with an external ip address to connect the api running locally.
+Usually there's such an instance running under the `squash-dev` namespace on GKE.
+
+3. Running `squash-api` locally:
 
 ```
-brew install mariadb
-mysql.server start
-```
-
-then create and initialize the development database
-
-```
-mysql -u root -e "DROP DATABASE qadb"
-mysql -u root -e "CREATE DATABASE qadb"
- 
 cd squash
-python manage.py makemigrations
-python manage.py migrate
-python manage.py loaddata test_data
-```
-
-3. Run the `squash-api` 
-
-```
+export SQUASH_DB_HOST=<squash-db external ip address> 
+export SQUASH_DB_PASSWORD=********
 export SQUASH_API_DEBUG=True
 python manage.py runserver
 ```
 
-The `squash-api` will run at `http://localhost:8000`. 
+The GraphiQL interface will run at `http://localhost:8000`. 
 
-### The Django debug toolbar
 
-When you run the `squash-api` with 
 
-```
-export SQUASH_API_DEBUG=True
-python manage.py runserver
-```
+### The django admin interface
 
-you also activate the Django debug toolbar. The Django debug toolbar can be used, among other things, to debug the SQL queries that
-are executed when accessing the API.
-
-### The SQuaSH API admin interface
-
-In development mode access the SQuaSH API admin interface at `http://localhost:8000/admin`. 
-You need to create a superuser in order to login:
+You can access the admin interface in development mode at `http://localhost:8000/admin`. Make
+sure you have created a super user in order to login:
  
 ```
 python manage.py createsuperuser 
