@@ -88,8 +88,8 @@ class Metric(models.Model):
 class Measurement(models.Model):
     """Measurement of a metric by a job.
     """
-    metric = models.ForeignKey(Metric, null=False)
-    job = models.ForeignKey(Job, null=False, related_name='measurements')
+    metric = models.ForeignKey(Metric, null=False, related_name='measurements')
+    job = models.ForeignKey(Job, null=False)
     value = models.FloatField(help_text='Metric scalar measurement')
     metadata = JSONField(null=True, blank=True, default=None,
                          help_text='Measurement metadata',

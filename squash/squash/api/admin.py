@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Job, Metric, Measurement, VersionedPackage
+from squash.api.models import Job, Metric, Measurement, VersionedPackage
 
 admin.site.register(Job)
 admin.site.register(Metric)

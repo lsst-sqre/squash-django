@@ -1,5 +1,5 @@
 from django.test import TestCase
-from .models import Job, Metric, Measurement
+from squash.api.models import Job, Metric, Measurement
 
 
 class JSONFieldTests(TestCase):
