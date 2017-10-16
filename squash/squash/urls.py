@@ -15,35 +15,13 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.conf import settings
 
-from rest_framework.routers import DefaultRouter
-from api import views
-
-admin.site.site_header = 'SQuaSH API'
-
-api_router = DefaultRouter()
-api_router.register(r'jobs', views.JobViewSet)
-api_router.register(r'metrics', views.MetricViewSet)
-api_router.register(r'datasets', views.DatasetViewSet,
-                    base_name='datasets')
-api_router.register(r'defaults', views.DefaultsViewSet,
-                    base_name='defaults')
-
-api_router.register(r'code_changes', views.CodeChangesViewSet,
-                    base_name='code_changes')
-
-api_router.register(r'measurements', views.MeasurementViewSet,
-                    base_name='measurements')
-api_router.register(r'apps', views.AppViewSet,
-                    base_name='apps')
+from graphene_django.views import GraphQLView
 
 urlpatterns = [
-    url(r'^', include(api_router.urls)),
+
     url(r'^admin/', admin.site.urls),
+    url(r'^$', GraphQLView.as_view(graphiql=True)),
 ]
 
-if settings.DEBUG:
-    import debug_toolbar
-    urlpatterns = [url(r'^__debug__/',
-                       include(debug_toolbar.urls)), ] + urlpatterns
+admin.site.site_header = 'SQuaSH API'
