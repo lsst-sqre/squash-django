@@ -6,11 +6,11 @@ SQuaSH API microservice.
 
 # GraphQL sample queries
 
-This implementation uses [graphene-django](http://docs.graphene-python.org/projects/django/en/latest/) to create a GraphQL [schema](https://github.com/lsst-sqre/squash-api/tree/master/squash/squash/api/schema.py) from the django ORM [model](https://github.com/lsst-sqre/squash-api/tree/master/squash/squash/api/models.py).
+This implementation uses [graphene-django](http://docs.graphene-python.org/projects/django/en/latest/) to create a GraphQL schema from the django ORM model.
  
 List all squash metrics, showing unit and description:
 
-```json
+```
 {
   metrics {
     metric
@@ -23,8 +23,7 @@ List all squash metrics, showing unit and description:
 
 List the first 5 measurements of each metric on `cfht` dataset:
 
-```json
-
+```
 {
   metrics {
     metric
@@ -39,15 +38,12 @@ List the first 5 measurements of each metric on `cfht` dataset:
     }
   }
 }
-
-
-
 ```
 
 
 Using the `__debug` field to output the underline SQL queries being executed: 
 
-```json 
+```
 {
   metrics {
     metric
@@ -67,7 +63,7 @@ Using the `__debug` field to output the underline SQL queries being executed:
 
 A generic query to inspect the GraphQL schema:
 
-```json
+```
 {
   __schema {
     queryType {
