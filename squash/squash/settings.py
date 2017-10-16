@@ -39,24 +39,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'rest_framework.authtoken',
+    'graphene_django',
     'django_filters',
     'json_field',
-    'api',
-    'debug_toolbar'
-
+    'squash.api.apps.ApiConfig',
 ]
 
-# Needed by django debug toolbar
-INTERNAL_IPS = '127.0.0.1'
-
-REST_FRAMEWORK_EXTENSIONS = {
-    'DEFAULT_CACHE_RESPONSE_TIMEOUT': 60 * 15
-}
-
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -65,6 +54,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+GRAPHENE = {
+    'SCHEMA': 'squash.schema.schema',
+    'SCHEMA_INDENT': 2,
+    'MIDDLEWARE': (
+        'graphene_django.debug.DjangoDebugMiddleware',
+    )
+}
+
 
 ROOT_URLCONF = 'squash.urls'
 
@@ -111,6 +109,9 @@ DATABASES = {
 
 DATABASES['default']['HOST'] = os.environ.get('SQUASH_DB_HOST', 'localhost')
 DATABASES['default']['PASSWORD'] = os.environ.get('SQUASH_DB_PASSWORD', '')
+
+
+# Environment variables set in the squash-api deployment
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
