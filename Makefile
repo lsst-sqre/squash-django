@@ -1,5 +1,5 @@
-API = lsstsqre/squash-api
-NGINX  = lsstsqre/squash-api-nginx
+API = lsstsqre/squash-graphql
+NGINX  = lsstsqre/squash-graphql-nginx
 NGINX_CONFIG = kubernetes/nginx/nginx.conf
 DEPLOYMENT_TEMPLATE = kubernetes/deployment-template.yaml
 DEPLOYMENT_CONFIG = kubernetes/deployment.yaml
@@ -20,25 +20,25 @@ push: check-tag
 
 service:
 	@echo "Creating service..."
-	kubectl delete --ignore-not-found=true services squash-api
+	kubectl delete --ignore-not-found=true services squash-graphql
 	kubectl create -f $(SERVICE_CONFIG)
 
 configmap:
 	@echo "Creating config map for nginx configuration..."
-	kubectl delete --ignore-not-found=true configmap squash-api-nginx-conf
-	kubectl create configmap squash-api-nginx-conf --from-file=$(NGINX_CONFIG)
+	kubectl delete --ignore-not-found=true configmap squash-graphql-nginx-conf
+	kubectl create configmap squash-graphql-nginx-conf --from-file=$(NGINX_CONFIG)
 
 deployment: check-tag service configmap
 	@echo "Creating deployment..."
 	@$(REPLACE) $(DEPLOYMENT_TEMPLATE) $(DEPLOYMENT_CONFIG)
-	kubectl delete --ignore-not-found=true deployment squash-api
+	kubectl delete --ignore-not-found=true deployment squash-graphql
 	kubectl create -f $(DEPLOYMENT_CONFIG)
 
 update: check-tag
-	@echo "Updating squash-api deployment..."
+	@echo "Updating squash-graphql deployment..."
 	@$(REPLACE) $(DEPLOYMENT_TEMPLATE) $(DEPLOYMENT_CONFIG)
 	kubectl apply -f $(DEPLOYMENT_CONFIG) --record
-	kubectl rollout history deployment squash-api
+	kubectl rollout history deployment squash-graphql
 
 clean:
 	rm $(DEPLOYMENT_CONFIG)

@@ -1,8 +1,6 @@
-# squash-api
+# squash-graphql
 
-SQuaSH API microservice.
-
-![SQuaSH API microservice](squash-api.png)
+SQuaSH GraphQL microservice.
 
 # GraphQL sample queries
 
@@ -84,10 +82,10 @@ A generic query to inspect the GraphQL schema:
 
 ## Kubernetes deployment
 
-`squash-api` requires the [squash-db](https://github.com/lsst-sqre/squash-db) microservice and the TLS secrets that are installed by the
+`squash-graphql` requires the [squash-db](https://github.com/lsst-sqre/squash-db) microservice and the TLS secrets that are installed by the
 [`squash-deployment`](https://github.com/lsst-sqre/squash-deployment) tool.
 
-Assuming you have kubectl configured to access your GKE cluster, you can deploy `squash-api` using:
+Assuming you have kubectl configured to access your GKE cluster, you can deploy `squash-graphql` using:
 
 ```
 TAG=latest make deployment
@@ -98,14 +96,14 @@ TAG=latest make deployment
 You can inspect the deployment using:
 
 ```bash
-kubectl describe deployment squash-api
+kubectl describe deployment squash-graphql
 ```
 
 and the container logs using:
  
 ``` 
-kubectl logs deployment/squash-api nginx
-kubectl logs deployment/squash-api api
+kubectl logs deployment/squash-graphql nginx
+kubectl logs deployment/squash-graphql api
 ```
 
 You can open a terminal inside the `api` container with:
@@ -119,10 +117,10 @@ kubectl exec -it <TAB> -c api /bin/bash
 Check the update history with:
 
 ```
-kubectl rollout history deployment squash-api
+kubectl rollout history deployment squash-graphql
 ```
 
-Modify the `squash-api` image and then apply the new configuration for the Kubernetes deployment:
+Modify the `squash-graphql` image and then apply the new configuration for the Kubernetes deployment:
 
 ```
 # you need to setup the env for Django to collect the static files
@@ -135,16 +133,16 @@ TAG=latest make build push update
 
 Check the deployment changes:
 ```
-kubectl describe deployments squash-api
+kubectl describe deployments squash-graphql
 ```
 
-### Scaling up the squash-api microservice
+### Scaling up the squash-graphql microservice
 
 Use the `kubectl get replicasets` command to view the current set of replicas, and then the `kubectl scale` command 
-to scale up the `squash-api` deployment:
+to scale up the `squash-graphql` deployment:
 
 ``` 
-kubectl scale deployments squash-api --replicas=3
+kubectl scale deployments squash-graphql --replicas=3
 ```
 
 or change the `kubernetes/deployment.yaml` configuration file and apply the new configuration:
@@ -156,7 +154,7 @@ kubectl apply -f kubernetes/deployment.yaml
 Check the deployment changes:
 
 ``` 
-kubectl describe deployments squash-api
+kubectl describe deployments squash-graphql
 kubectl get pods
 kubectl get replicasets
 ```
@@ -167,9 +165,9 @@ For development, you may install the dependencies and set up a local database wi
 
 1. Install the software dependencies
 ```
-git clone  https://github.com/lsst-sqre/squash-api.git
+git clone  https://github.com/lsst-sqre/squash-graphql.git
 
-cd squash-api
+cd squash-graphql
 
 virtualenv env -p python3
 source env/bin/activate
@@ -181,7 +179,7 @@ pip install -r requirements.txt
 You can use an instance of [squash-db](https://github.com/lsst-sqre/squash-db) with an external ip address to connect the api running locally.
 Usually there's such an instance running under the `squash-dev` namespace on GKE.
 
-3. Running `squash-api` locally:
+3. Running `squash-graphql` locally:
 
 ```
 cd squash
@@ -192,16 +190,4 @@ python manage.py runserver
 ```
 
 The GraphiQL interface will run at `http://localhost:8000`. 
-
-
-
-### The django admin interface
-
-You can access the admin interface in development mode at `http://localhost:8000/admin`. Make
-sure you have created a super user in order to login:
- 
-```
-python manage.py createsuperuser 
-```
- 
 

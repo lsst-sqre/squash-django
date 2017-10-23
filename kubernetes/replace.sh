@@ -17,7 +17,7 @@ WAIT_TIME=5
 while [ "$HOST" == "" ] && [ "$WAIT_TIME" -le 20 ]; do
     echo "Waiting for the service to become available..."
     sleep $(( WAIT_TIME++ ))
-    HOST=$(kubectl get service squash-api -o jsonpath --template='{.status.loadBalancer.ingress[0].ip}')
+    HOST=$(kubectl get service squash-graphql -o jsonpath --template='{.status.loadBalancer.ingress[0].ip}')
 done
 
 if [ "$HOST" == "" ]; then
@@ -30,10 +30,10 @@ echo "Service address: $HOST:$PORT"
 
 NAMESPACE=$(kubectl config current-context)
 
-SQUASH_API_HOST="squash-api-${NAMESPACE}.lsst.codes"
+SQUASH_API_HOST="squash-graphql-${NAMESPACE}.lsst.codes"
 
 if [ "$NAMESPACE" == "squash-prod" ]; then
-    SQUASH_API_HOST="squash-api.lsst.codes"
+    SQUASH_API_HOST="squash-graphql.lsst.codes"
 fi
 
 

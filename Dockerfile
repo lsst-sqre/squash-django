@@ -1,4 +1,4 @@
-# Docker image for squash-api microservice
+# Docker image for squash-graphql microservice
 FROM python:3.6-slim
 LABEL maintainer "afausti@lsst.org"
 WORKDIR /opt
