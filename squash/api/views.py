@@ -1,6 +1,8 @@
 from ast import literal_eval
 import pandas as pd
-from operator import itemgetter
+import datetime
+import itertools
+
 from django.db import connection
 
 from rest_framework import authentication, permissions,\
@@ -9,7 +11,7 @@ from rest_framework import authentication, permissions,\
 from rest_framework_extensions.cache.mixins import CacheResponseMixin
 
 from .forms import JobFilter
-from .models import Job, Metric, Measurement, VersionedPackage
+from .models import Job, Metric, Measurement
 from .serializers import JobSerializer, MetricSerializer
 
 
@@ -53,53 +55,52 @@ class CodeChangesViewSet(DefaultsMixin, CacheResponseMixin, viewsets.ViewSet):
     """API endpoint consumed by the Monitor app. It returns the list of packages
     that changed wrt to the previous ci job"""
 
-    def get_packages(self, job):
-        queryset = VersionedPackage.objects.\
-            filter(job=job).values('name',
-                                   'git_commit',
-                                   'git_url')
-
-        return set(map(itemgetter('name',
-                                  'git_commit',
-                                  'git_url'), queryset))
-
     def compute_code_changes(self, queryset):
-        """ This method detects:
-        - new packages present in the current job but not present in the
+        """ This method detects differences in the packages between two ci jobs
+        - packages present in the current ci job but not present in the
         previous one
         - packages present in the previous job but removed in the current one
-        - packages present in both the current and previous jobs that
-        changed (according to the git commit sha)
+        - packages present in both but that have changed according to the git
+        commit sha
         """
+
+        # list of unique job id's from the queryset
+        ci_ids = []
+        for x in queryset:
+            if x[0] not in ci_ids:
+                ci_ids.append(x[0])
+
         code_changes = []
 
-        for job in queryset:
-            current = self.get_packages(job)
-            ci_id = job.ci_id
-            try:
-                # jobs are sorted by date because ci_id is a char
-                previous_job = job.get_previous_by_date()
+        for prev_ci_id, curr_ci_id in self.pairwise(ci_ids):
 
-                # make sure previous is not the current ci_id
-                while ci_id == previous_job.ci_id:
-                    previous_job = previous_job.get_previous_by_date()
-            except:
-                # in case we don't have a previous job
-                previous_job = job
+            # we carry on the pkg name, the git commit sha and the git url
+            prev_pkgs = set([(pkg[1], pkg[2], pkg[3])
+                             for pkg in queryset if pkg[0] == prev_ci_id])
+            curr_pkgs = set([(pkg[1], pkg[2], pkg[3])
+                             for pkg in queryset if pkg[0] == curr_ci_id])
 
-            previous = self.get_packages(previous_job)
-            packages = current.difference(previous)
+            diff_pkgs = curr_pkgs.difference(prev_pkgs)
 
-            if packages:
-                code_changes.append({'ci_id': ci_id,
-                                     'packages': packages,
-                                     'count': len(packages)})
+            if diff_pkgs:
+                code_changes.append({'ci_id': curr_ci_id,
+                                     'packages': diff_pkgs,
+                                     'count': len(diff_pkgs)})
         return code_changes
 
-    def list(self, request):
-        """Return list of packages as pandas df"""
+    def pairwise(self, iterable):
+        "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+        a, b = itertools.tee(iterable)
+        next(b, None)
+        return zip(a, b)
 
-        queryset = Job.objects.all().order_by('date')
+    def list(self, request):
+        """Return the code changes as a pandas data frame"""
+
+        queryset = Job.objects.prefetch_related('packages')\
+            .values_list('ci_id', 'packages__name',
+                         'packages__git_commit',
+                         'packages__git_url').order_by('date')
 
         ci_dataset = self.request.query_params.get('ci_dataset', None)
 
@@ -148,6 +149,24 @@ class MeasurementViewSet(DefaultsMixin, CacheResponseMixin, viewsets.ViewSet):
 
         if ci_dataset is not None:
             queryset = queryset.filter(job__ci_dataset=ci_dataset)
+
+        period = self.request.query_params.get('period', None)
+
+        if period is not None:
+            end = datetime.datetime.today()
+
+            # by default shows last month of data
+            start = end - datetime.timedelta(weeks=4)
+
+            if period == "Last year":
+                start = end - datetime.timedelta(weeks=48)
+            elif period == "Last 6 months":
+                start = end - datetime.timedelta(weeks=24)
+            elif period == "Last 3 months":
+                start = end - datetime.timedelta(weeks=12)
+
+            if period != "All":
+                queryset = queryset.filter(job__date__gt=start)
 
         df = self.to_df(queryset.values('job__ci_dataset', 'job__ci_id',
                                         'job__date', 'job__ci_url', 'value',
@@ -202,17 +221,24 @@ class DefaultsViewSet(DefaultsMixin, viewsets.ViewSet):
             ci_dataset = job[0]['ci_dataset']
 
         # user wants to see always the same metric, pick the first
-        metrics = Metric.objects.values_list('metric', flat=True)
+        # metrics = Metric.objects.values_list('metric', flat=True)
 
-        metric = None
-        if metrics.exists():
-            metric = metrics[0]
+        # metric = None
+        # if metrics.exists():
+        #     metric = metrics[0]
+
+        # Temporary workaround for DM-12237
+
+        metric = "AM1"
 
         # default values for parameters used by the bokeh apps
         snr_cut = '100'
 
+        # default time period to display data
+        period = 'Last 6 months'
+
         return {'ci_id': ci_id, 'ci_dataset': ci_dataset,
-                'metric': metric, 'snr_cut': snr_cut}
+                'metric': metric, 'snr_cut': snr_cut, 'period': period}
 
     def list(self, request):
         defaults = self.get_defaults()
