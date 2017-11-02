@@ -5,7 +5,7 @@ SQuaSH API microservice
 
 ## Requirements
 
-`squash-api` requires the [squash-db](https://github.com/lsst-sqre/squash-api) microservice and the TLS secrets that are installed by the
+`squash-api` requires the [squash-db](https://github.com/lsst-sqre/squash-db) microservice and the TLS secrets that are installed by the
 [`squash-deployment`](https://github.com/lsst-sqre/squash-deployment) tool.
 
 ## Kubernetes deployment
@@ -101,29 +101,15 @@ pip install -r requirements.txt
 
 2. Development database
  
-You can install `mariadb 10.1+`, for instance using `brew`:
+Follow the instructions to deploy [squash-db](https://github.com/lsst-sqre/squash-db)) and configure an external ip address using a `LoadBalancer` service type.
+
+3. Running `squash-api` locally:
 
 ```
-brew install mariadb
-mysql.server start
-```
-
-then create and initialize the development database
-
-```
-mysql -u root -e "DROP DATABASE qadb"
-mysql -u root -e "CREATE DATABASE qadb"
- 
-cd squash
-python manage.py makemigrations
-python manage.py migrate
-python manage.py loaddata test_data
-```
-
-3. Run the `squash-api` 
-
-```
+export SQUASH_DB_HOST=<squash-db external ip>
+export SQUASH_DB_PASSWORD=<squash-db password>
 export SQUASH_API_DEBUG=True
+cd squash
 python manage.py runserver
 ```
 
