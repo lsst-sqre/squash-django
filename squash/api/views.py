@@ -11,7 +11,7 @@ from rest_framework import authentication, permissions,\
 from rest_framework_extensions.cache.mixins import CacheResponseMixin
 
 from .forms import JobFilter
-from .models import Job, Metric, Measurement
+from .models import Job, Metric, Measurement, Job, VersionedPackage
 from .serializers import JobSerializer, MetricSerializer
 
 
@@ -295,3 +295,39 @@ class AppViewSet(DefaultsMixin, viewsets.ViewSet):
         data = self.get_app_data(ci_id, ci_dataset, metric)
 
         return response.Response(data)
+
+class StatisticsViewSet(DefaultsMixin, viewsets.ViewSet):
+    """
+    API endpoint for listing statistics shown on the squash
+    home page.
+    """
+
+    def get_stats(self):
+
+        latest_job = Job.objects.latest('pk')
+
+        number_of_metrics = Metric.objects.count()
+
+        number_of_packages = \
+            VersionedPackage.objects.filter(job=latest_job).count()
+
+        number_of_jobs = Job.objects.count()
+
+        number_of_measurements = Measurement.objects.count()
+
+        datasets = Job.objects.values_list('ci_dataset', flat=True).distinct()
+
+        latest_job_date = latest_job.date.strftime("%b %d %Y")
+
+        return { 'number_of_metrics': number_of_metrics,
+                'number_of_packages': number_of_packages,
+                'number_of_jobs': number_of_jobs,
+                'number_of_measurements': number_of_measurements,
+                'datasets': ', '.join(datasets),
+                'latest_job_date': latest_job_date}
+
+    def list(self, request):
+        stats = self.get_stats()
+        return response.Response(stats)
+
+

@@ -20,18 +20,26 @@ from api import views
 admin.site.site_header = 'SQuaSH API'
 
 api_router = DefaultRouter()
+
 api_router.register(r'jobs', views.JobViewSet)
+
 api_router.register(r'metrics', views.MetricViewSet)
+
 api_router.register(r'datasets', views.DatasetViewSet,
                     base_name='datasets')
+
 api_router.register(r'defaults', views.DefaultsViewSet,
                     base_name='defaults')
+
+api_router.register(r'stats', views.StatisticsViewSet,
+                    base_name='stats')
 
 api_router.register(r'code_changes', views.CodeChangesViewSet,
                     base_name='code_changes')
 
 api_router.register(r'measurements', views.MeasurementViewSet,
                     base_name='measurements')
+
 api_router.register(r'apps', views.AppViewSet,
                     base_name='apps')
 
