@@ -10,11 +10,20 @@ SQuaSH API microservice
 
 ## Kubernetes deployment
 
-Assuming you have kubectl configured to access your GCE cluster, you can deploy `squash-api` using:
+Assuming you have kubectl configured to access your GKE cluster, you can deploy `squash-api` using:
 
 ```
-TAG=latest make deployment
+cd squash-api
+TAG=latest make service deployment
 ```
+
+If the service is already created and you don't want to recreate
+it you can update the deployment using
+
+```
+TAG=latest make update
+```
+
 
 ### Debugging
 
