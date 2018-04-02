@@ -1,3 +1,5 @@
+DEPRECATED use [squash-rest-api](https://github.com/lsst-sqre/squash-rest-api) instead.
+
 # squash-api
 SQuaSH API microservice
 
