@@ -1,4 +1,4 @@
-DEPRECATED use [squash-rest-api](https://github.com/lsst-sqre/squash-rest-api) instead.
+DEPRECATED use [squash-restful-api](https://github.com/lsst-sqre/squash-restful-api) instead.
 
 # squash-api
 SQuaSH API microservice
